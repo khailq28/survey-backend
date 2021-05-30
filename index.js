@@ -2,7 +2,12 @@ const express = require("express");
 const socketio = require("socket.io");
 const http = require("http");
 const mongoose = require("mongoose");
-const action = require("./action");
+
+const {
+    getSurveyByAuthor,
+    deleteSurveyById,
+    createNewForm,
+} = require("./action");
 
 const PORT = process.env.PORT || 5000;
 
@@ -15,40 +20,26 @@ const io = socketio(server);
 io.on("connection", (socket) => {
     console.log("We have a new connection!!!");
 
-    socket.on("join", (data) => {
-        console.log(data);
+    // home page
+    socket.on("CLIENT_GET_SURVEY_BY_AUTHOR", (sAuthor) => {
+        socket.join(sAuthor);
+        socket.room = sAuthor;
+
+        getSurveyByAuthor(sAuthor, socket, io);
+
+        socket.on("CLIENT_REMOVE_SURVEY", (sSurveyId) => {
+            deleteSurveyById(sSurveyId, sAuthor, socket, io);
+        });
+
+        socket.on("CLIENT_CREATE_NEW_FORM", (sFormId) => {
+            createNewForm(sFormId, sAuthor, socket, io);
+        });
+    });
+
+    socket.on("disconnect", () => {
+        console.log("User had left!!!");
     });
 });
-
-action.getSurveyByAuthor("khailuong61@gmail.com");
-
-// const a = new Survey({
-//     id: "81b84e3-a076-56a-8bc-33bcc2b62d",
-//     author: "khailuong61@gmail.com",
-//     title: "Mẫu Không tiêu đề",
-//     description: "",
-//     questions: [
-//         {
-//             questionText: "",
-//             questionType: "text",
-//             options: [{ optionText: "" }],
-//             open: true,
-//             required: false,
-//             answers: [],
-//         },
-//     ],
-//     interfaceColor: "#673AB7",
-//     backgroundColor: "#F0EBF8",
-//     updateDate: "18:03 30/05/2021",
-// });
-
-// a.save()
-//     .then((result) => {
-//         console.log(result);
-//     })
-//     .catch((err) => {
-//         console.log(err);
-//     });
 
 app.use(router);
 
