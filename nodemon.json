@@ -1,0 +1,5 @@
+{
+    "env": {
+        "MONGO_URL" : "mongodb+srv://surveyapp:survey123@cluster0.csh9w.mongodb.net/myFirstDatabase?retryWrites=true&w=majority"
+    }
+}
