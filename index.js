@@ -15,6 +15,7 @@ const {
     setQuestions,
     setOpenQuestion,
     setTitleQuestion,
+    setQuestionType,
 } = require("./action");
 
 const PORT = process.env.PORT || 5000;
@@ -74,6 +75,14 @@ io.on("connection", (socket) => {
 
         socket.on("CLIENT_CHANGE_TITLE_QUESTION", (oDataSetTitleQues) => {
             setTitleQuestion(
+                oData.id,
+                oDataSetTitleQues.id,
+                oDataSetTitleQues.value,
+            );
+        });
+
+        socket.on("CLIENT_CHANGE_QUESTION_TYPE", (oDataSetTitleQues) => {
+            setQuestionType(
                 oData.id,
                 oDataSetTitleQues.id,
                 oDataSetTitleQues.value,

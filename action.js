@@ -264,6 +264,19 @@ const setTitleQuestion = async (sId, sIdQues, sTitle) => {
         { $set: { "questions.$.questionText": sTitle } },
     ).exec();
 };
+
+/*
+ * set question type
+ * @param {string} sId
+ * @param {string} sIdQues
+ * @param {string} sType
+ */
+const setQuestionType = async (sId, sIdQues, sType) => {
+    await Survey.findOneAndUpdate(
+        { _id: sId, "questions._id": sIdQues },
+        { $set: { "questions.$.questionType": sType } },
+    ).exec();
+};
 module.exports = {
     getSurveyByAuthor,
     deleteSurveyById,
@@ -276,4 +289,5 @@ module.exports = {
     setQuestions,
     setOpenQuestion,
     setTitleQuestion,
+    setQuestionType,
 };
