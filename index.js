@@ -13,6 +13,7 @@ const {
     setInterfaceColor,
     setBackgroundColor,
     setQuestions,
+    setOpenQuestion,
 } = require("./action");
 
 const PORT = process.env.PORT || 5000;
@@ -37,8 +38,8 @@ io.on("connection", (socket) => {
             deleteSurveyById(sSurveyId, sAuthor, socket, io);
         });
 
-        socket.on("CLIENT_CREATE_NEW_FORM", (sFormId) => {
-            createNewForm(sFormId, sAuthor, socket, io);
+        socket.on("CLIENT_CREATE_NEW_FORM", () => {
+            createNewForm(sAuthor, socket, io);
         });
     });
 
@@ -65,6 +66,10 @@ io.on("connection", (socket) => {
         socket.on("CLIENT_SET_QUESTIONS", (aQuestions) => {
             setQuestions(oData.id, aQuestions);
         });
+
+        socket.on("CLIENT_CHANGE_OPEN_QUESTION", (sIdQues) => {
+            setOpenQuestion(oData.id, sIdQues);
+        });
     });
 
     socket.on("disconnect", () => {
@@ -73,13 +78,20 @@ io.on("connection", (socket) => {
 });
 
 // const Survey = require("./models/surveyModel");
+// var a = `questions.${2}.open`;
 // Survey.findOneAndUpdate(
-//     { id: "00ef6ae-73e1-682e-ab7-f11e1ae8713" },
-//     { title: "hello" },
+//     {
+//         id: "00ef6ae-73e1-682e-ab7-f11e1ae8713",
+//     },
+//     { "questions.2.open": true },
+//     // { "questions[0].open": 1 },
+//     // { $set: { "questions.$.open": false } },
+//     // // { id: sId },
+//     // { $set: { "questions.$.questionText": "s" } },
 // )
 //     .exec()
-//     .then(() => {
-//         console.log("xong");
+//     .then((data) => {
+//         console.log(data);
 //     })
 //     .catch((err) => {
 //         console.log(err);

@@ -1,10 +1,6 @@
 const mongooes = require("mongoose");
 
 const SurveysSchema = new mongooes.Schema({
-    id: {
-        type: String,
-        required: true,
-    },
     author: {
         type: String,
         required: true,

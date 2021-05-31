@@ -19,7 +19,11 @@ const formatDate = () => {
  * @param {string} sId
  */
 const setUpdateDate = async (sId, sAuthor, socket, io) => {
-    await Survey.findOneAndUpdate({ id: sId }, { updateDate: formatDate() })
+    await Survey.findOneAndUpdate(
+        { _id: sId },
+        { updateDate: formatDate() },
+        { new: true },
+    )
         .exec()
         .then(() => {
             getSurveyByAuthor(sAuthor, socket, io, false);
@@ -38,10 +42,7 @@ const setUpdateDate = async (sId, sAuthor, socket, io) => {
  * emit message
  */
 const getSurveyByAuthor = async (sAuthor, socket, io, bFirstAccess) => {
-    await Survey.find(
-        { author: sAuthor },
-        { id: 1, title: 1, updateDate: 1, _id: 0 },
-    )
+    await Survey.find({ author: sAuthor }, { title: 1, updateDate: 1 })
         .exec()
         .then((data) => {
             if (bFirstAccess) {
@@ -64,7 +65,7 @@ const getSurveyByAuthor = async (sAuthor, socket, io, bFirstAccess) => {
  * emit message
  */
 const deleteSurveyById = async (sId, sAuthor, socket, io) => {
-    await Survey.deleteOne({ id: sId })
+    await Survey.findByIdAndRemove(sId)
         .exec()
         .then(() => {
             getSurveyByAuthor(sAuthor, socket, io, false);
@@ -76,15 +77,13 @@ const deleteSurveyById = async (sId, sAuthor, socket, io) => {
 
 /*
  * create new form
- * @param {string} sFormId
  * @param {string} sAuthor : current user
  * @param socket
  * @param io
  * emit message
  */
-const createNewForm = async (sFormId, sAuthor, socket, io) => {
+const createNewForm = async (sAuthor, socket, io) => {
     const oSurvey = new Survey({
-        id: sFormId,
         author: sAuthor,
         title: "Mẫu Không tiêu đề",
         description: "",
@@ -105,8 +104,9 @@ const createNewForm = async (sFormId, sAuthor, socket, io) => {
 
     oSurvey
         .save()
-        .then(() => {
+        .then((data) => {
             getSurveyByAuthor(sAuthor, socket, io, false);
+            socket.emit("SERVER_SEND_MESSAGE_CREATE_SURVEY_SUCCESS", data._id);
         })
         .catch((err) => {
             console.log(err);
@@ -121,7 +121,7 @@ const createNewForm = async (sFormId, sAuthor, socket, io) => {
  * emit message
  */
 const findSurveyById = async (sId, sAuthor, socket, io) => {
-    await Survey.findOne({ id: sId }, { _id: 0 })
+    await Survey.findById(sId)
         .exec()
         .then((data) => {
             if (sAuthor === data.author) {
@@ -147,7 +147,11 @@ const findSurveyById = async (sId, sAuthor, socket, io) => {
  */
 
 const setTitle = async (sId, sAuthor, sTitle, socket, io) => {
-    await Survey.findOneAndUpdate({ id: sId }, { title: sTitle })
+    await Survey.findOneAndUpdate(
+        { _id: sId },
+        { title: sTitle },
+        { new: true },
+    )
         .exec()
         .then(() => {
             getSurveyByAuthor(sAuthor, socket, io, false);
@@ -163,7 +167,11 @@ const setTitle = async (sId, sAuthor, sTitle, socket, io) => {
  * @param {string} sDescription
  */
 const setDescription = async (sId, sDescription) => {
-    await Survey.findOneAndUpdate({ id: sId }, { description: sDescription })
+    await Survey.findOneAndUpdate(
+        { _id: sId },
+        { description: sDescription },
+        { new: true },
+    )
         .exec()
         .then()
         .catch((err) => {
@@ -176,7 +184,11 @@ const setDescription = async (sId, sDescription) => {
  * @param {string} sColor
  */
 const setInterfaceColor = async (sId, sColor) => {
-    await Survey.findOneAndUpdate({ id: sId }, { interfaceColor: sColor })
+    await Survey.findOneAndUpdate(
+        { _id: sId },
+        { interfaceColor: sColor },
+        { new: true },
+    )
         .exec()
         .then()
         .catch((err) => {
@@ -189,7 +201,11 @@ const setInterfaceColor = async (sId, sColor) => {
  * @param {string} sColor
  */
 const setBackgroundColor = async (sId, sColor) => {
-    await Survey.findOneAndUpdate({ id: sId }, { backgroundColor: sColor })
+    await Survey.findOneAndUpdate(
+        { _id: sId },
+        { backgroundColor: sColor },
+        { new: true },
+    )
         .exec()
         .then()
         .catch((err) => {
@@ -199,16 +215,43 @@ const setBackgroundColor = async (sId, sColor) => {
 
 /*
  * set questions
- * @param {array} aQuestions
+ * @param {array} index
  */
 const setQuestions = async (sId, aQuestions) => {
-    await Survey.findOneAndUpdate({ id: sId }, { questions: aQuestions })
+    await Survey.findOneAndUpdate(
+        { _id: sId },
+        { questions: aQuestions },
+        { new: true },
+    )
         .exec()
         .then()
         .catch((err) => {
             console.log(err);
         });
 };
+
+/*
+ * set open question
+ * @param {string} sId
+ * @param {string} sIdQues
+ */
+const setOpenQuestion = async (sId, sIdQues) => {
+    await Survey.findOneAndUpdate(
+        { _id: sId, "questions.open": true },
+        { $set: { "questions.$.open": false } },
+    )
+        .exec()
+        .then(() => {
+            Survey.findOneAndUpdate(
+                { _id: sId, "questions._id": sIdQues },
+                { $set: { "questions.$.open": true } },
+            ).exec();
+        })
+        .catch((err) => {
+            console.log(err);
+        });
+};
+
 module.exports = {
     getSurveyByAuthor,
     deleteSurveyById,
@@ -219,4 +262,5 @@ module.exports = {
     setInterfaceColor,
     setBackgroundColor,
     setQuestions,
+    setOpenQuestion,
 };
