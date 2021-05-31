@@ -12,6 +12,7 @@ const {
     setDescription,
     setInterfaceColor,
     setBackgroundColor,
+    setQuestions,
 } = require("./action");
 
 const PORT = process.env.PORT || 5000;
@@ -59,6 +60,10 @@ io.on("connection", (socket) => {
 
         socket.on("CLIENT_CHANGE_BACKGROUND_COLOR", (sColor) => {
             setBackgroundColor(oData.id, sColor);
+        });
+
+        socket.on("CLIENT_SET_QUESTIONS", (aQuestions) => {
+            setQuestions(oData.id, aQuestions);
         });
     });
 

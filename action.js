@@ -196,6 +196,19 @@ const setBackgroundColor = async (sId, sColor) => {
             console.log(err);
         });
 };
+
+/*
+ * set questions
+ * @param {array} aQuestions
+ */
+const setQuestions = async (sId, aQuestions) => {
+    await Survey.findOneAndUpdate({ id: sId }, { questions: aQuestions })
+        .exec()
+        .then()
+        .catch((err) => {
+            console.log(err);
+        });
+};
 module.exports = {
     getSurveyByAuthor,
     deleteSurveyById,
@@ -205,4 +218,5 @@ module.exports = {
     setDescription,
     setInterfaceColor,
     setBackgroundColor,
+    setQuestions,
 };
