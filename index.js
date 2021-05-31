@@ -7,6 +7,7 @@ const {
     getSurveyByAuthor,
     deleteSurveyById,
     createNewForm,
+    findSurveyById,
 } = require("./action");
 
 const PORT = process.env.PORT || 5000;
@@ -34,6 +35,11 @@ io.on("connection", (socket) => {
         socket.on("CLIENT_CREATE_NEW_FORM", (sFormId) => {
             createNewForm(sFormId, sAuthor, socket, io);
         });
+    });
+
+    // create survey
+    socket.on("CLIENT_GET_DATA_SURVEY", (sId) => {
+        findSurveyById(sId, socket);
     });
 
     socket.on("disconnect", () => {

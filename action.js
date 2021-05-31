@@ -48,6 +48,7 @@ const deleteSurveyById = async (sId, sAuthor, socket, io) => {
         .exec()
         .then(() => {
             getSurveyByAuthor(sAuthor, socket, io);
+            socket.emit("REMOVE_SURVEY_SUCCESS");
         })
         .catch((err) => {
             console.log(err);
@@ -61,7 +62,7 @@ const deleteSurveyById = async (sId, sAuthor, socket, io) => {
  * @param socket
  * @param io
  */
-const createNewForm = (sFormId, sAuthor, socket, io) => {
+const createNewForm = async (sFormId, sAuthor, socket, io) => {
     const oSurvey = new Survey({
         id: sFormId,
         author: sAuthor,
@@ -92,4 +93,25 @@ const createNewForm = (sFormId, sAuthor, socket, io) => {
         });
 };
 
-module.exports = { getSurveyByAuthor, deleteSurveyById, createNewForm };
+/*
+ * find survey by id
+ * @param {string} sId
+ * @param socket
+ */
+const findSurveyById = async (sId, socket) => {
+    await Survey.findOne({ id: sId }, { _id: 0 })
+        .exec()
+        .then((data) => {
+            socket.emit("SERVER_SEND_SURVEY_TO_CREATE_FORM_PAGE", data);
+        })
+        .catch((err) => {
+            console.log(err);
+        });
+};
+
+module.exports = {
+    getSurveyByAuthor,
+    deleteSurveyById,
+    createNewForm,
+    findSurveyById,
+};
