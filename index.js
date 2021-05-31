@@ -14,6 +14,7 @@ const {
     setBackgroundColor,
     setQuestions,
     setOpenQuestion,
+    setTitleQuestion,
 } = require("./action");
 
 const PORT = process.env.PORT || 5000;
@@ -69,6 +70,14 @@ io.on("connection", (socket) => {
 
         socket.on("CLIENT_CHANGE_OPEN_QUESTION", (sIdQues) => {
             setOpenQuestion(oData.id, sIdQues);
+        });
+
+        socket.on("CLIENT_CHANGE_TITLE_QUESTION", (oDataSetTitleQues) => {
+            setTitleQuestion(
+                oData.id,
+                oDataSetTitleQues.id,
+                oDataSetTitleQues.value,
+            );
         });
     });
 

@@ -252,6 +252,18 @@ const setOpenQuestion = async (sId, sIdQues) => {
         });
 };
 
+/*
+ * set title question
+ * @param {string} sId
+ * @param {string} sIdQues
+ * @param {string} sTitle
+ */
+const setTitleQuestion = async (sId, sIdQues, sTitle) => {
+    await Survey.findOneAndUpdate(
+        { _id: sId, "questions._id": sIdQues },
+        { $set: { "questions.$.questionText": sTitle } },
+    ).exec();
+};
 module.exports = {
     getSurveyByAuthor,
     deleteSurveyById,
@@ -263,4 +275,5 @@ module.exports = {
     setBackgroundColor,
     setQuestions,
     setOpenQuestion,
+    setTitleQuestion,
 };
