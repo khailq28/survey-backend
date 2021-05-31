@@ -12,11 +12,30 @@ const formatDate = () => {
 };
 
 /*
+ * update date
+ * @param {string} author
+ * @param socket
+ * @param io
+ * @param {string} sId
+ */
+const setUpdateDate = async (sId, sAuthor, socket, io) => {
+    await Survey.findOneAndUpdate({ id: sId }, { updateDate: formatDate() })
+        .exec()
+        .then(() => {
+            getSurveyByAuthor(sAuthor, socket, io, false);
+        })
+        .catch((err) => {
+            console.log(err);
+        });
+};
+
+/*
  * get id, title, updateDate by author
  * @param {string} author
  * @param socket
  * @param io
  * @param {boolean} bFirstAccess
+ * emit message
  */
 const getSurveyByAuthor = async (sAuthor, socket, io, bFirstAccess) => {
     await Survey.find(
@@ -28,7 +47,7 @@ const getSurveyByAuthor = async (sAuthor, socket, io, bFirstAccess) => {
             if (bFirstAccess) {
                 socket.emit("SERVER_SEND_SURVEYS", data);
             } else {
-                io.sockets.in(socket.room).emit("SERVER_SEND_SURVEYS", data);
+                io.sockets.in(sAuthor).emit("SERVER_SEND_SURVEYS_ALL", data);
             }
         })
         .catch((err) => {
@@ -42,13 +61,13 @@ const getSurveyByAuthor = async (sAuthor, socket, io, bFirstAccess) => {
  * @param {string} sAuthor : current user
  * @param socket
  * @param io
+ * emit message
  */
 const deleteSurveyById = async (sId, sAuthor, socket, io) => {
     await Survey.deleteOne({ id: sId })
         .exec()
         .then(() => {
-            getSurveyByAuthor(sAuthor, socket, io);
-            socket.emit("REMOVE_SURVEY_SUCCESS");
+            getSurveyByAuthor(sAuthor, socket, io, false);
         })
         .catch((err) => {
             console.log(err);
@@ -61,6 +80,7 @@ const deleteSurveyById = async (sId, sAuthor, socket, io) => {
  * @param {string} sAuthor : current user
  * @param socket
  * @param io
+ * emit message
  */
 const createNewForm = async (sFormId, sAuthor, socket, io) => {
     const oSurvey = new Survey({
@@ -86,7 +106,7 @@ const createNewForm = async (sFormId, sAuthor, socket, io) => {
     oSurvey
         .save()
         .then(() => {
-            getSurveyByAuthor(sAuthor, socket, io);
+            getSurveyByAuthor(sAuthor, socket, io, false);
         })
         .catch((err) => {
             console.log(err);
@@ -96,14 +116,56 @@ const createNewForm = async (sFormId, sAuthor, socket, io) => {
 /*
  * find survey by id
  * @param {string} sId
+ * @param {string} sAuthor
  * @param socket
+ * emit message
  */
-const findSurveyById = async (sId, socket) => {
+const findSurveyById = async (sId, sAuthor, socket, io) => {
     await Survey.findOne({ id: sId }, { _id: 0 })
         .exec()
         .then((data) => {
-            socket.emit("SERVER_SEND_SURVEY_TO_CREATE_FORM_PAGE", data);
+            if (sAuthor === data.author) {
+                setUpdateDate(sId, sAuthor, socket, io);
+                socket.emit("SERVER_SEND_SURVEY_TO_CREATE_FORM_PAGE", data);
+            } else {
+                socket.emit("SERVER_SEND_MESSAGE_NO_ACCESS");
+            }
         })
+        .catch((err) => {
+            console.log(err);
+            socket.emit("SERVER_SEND_MESSAGE_NO_ACCESS");
+        });
+};
+
+/*
+ * set title
+ * @param {string} sId : id form
+ * @param {string} sAuthor
+ * @param {string} sTitle
+ * @param socket
+ * @param io
+ */
+
+const setTitle = async (sId, sAuthor, sTitle, socket, io) => {
+    await Survey.findOneAndUpdate({ id: sId }, { title: sTitle })
+        .exec()
+        .then(() => {
+            getSurveyByAuthor(sAuthor, socket, io, false);
+        })
+        .catch((err) => {
+            console.log(err);
+        });
+};
+
+/*
+ * set description
+ * @param {string} sId : id form
+ * @param {string} sDescription
+ */
+const setDescription = async (sId, sDescription) => {
+    await Survey.findOneAndUpdate({ id: sId }, { description: sDescription })
+        .exec()
+        .then()
         .catch((err) => {
             console.log(err);
         });
@@ -114,4 +176,6 @@ module.exports = {
     deleteSurveyById,
     createNewForm,
     findSurveyById,
+    setTitle,
+    setDescription,
 };
