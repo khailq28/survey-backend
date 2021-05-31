@@ -25,7 +25,7 @@ io.on("connection", (socket) => {
         socket.join(sAuthor);
         socket.room = sAuthor;
 
-        getSurveyByAuthor(sAuthor, socket, io);
+        getSurveyByAuthor(sAuthor, socket, io, true);
 
         socket.on("CLIENT_REMOVE_SURVEY", (sSurveyId) => {
             deleteSurveyById(sSurveyId, sAuthor, socket, io);

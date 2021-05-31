@@ -16,15 +16,20 @@ const formatDate = () => {
  * @param {string} author
  * @param socket
  * @param io
+ * @param {boolean} bFirstAccess
  */
-const getSurveyByAuthor = async (sAuthor, socket, io) => {
+const getSurveyByAuthor = async (sAuthor, socket, io, bFirstAccess) => {
     await Survey.find(
         { author: sAuthor },
         { id: 1, title: 1, updateDate: 1, _id: 0 },
     )
         .exec()
         .then((data) => {
-            io.sockets.in(socket.room).emit("SERVER_SEND_SURVEYS", data);
+            if (bFirstAccess) {
+                socket.emit("SERVER_SEND_SURVEYS", data);
+            } else {
+                io.sockets.in(socket.room).emit("SERVER_SEND_SURVEYS", data);
+            }
         })
         .catch((err) => {
             console.log(err);
