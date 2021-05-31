@@ -171,6 +171,31 @@ const setDescription = async (sId, sDescription) => {
         });
 };
 
+/*
+ * set interface color
+ * @param {string} sColor
+ */
+const setInterfaceColor = async (sId, sColor) => {
+    await Survey.findOneAndUpdate({ id: sId }, { interfaceColor: sColor })
+        .exec()
+        .then()
+        .catch((err) => {
+            console.log(err);
+        });
+};
+
+/*
+ * set background color
+ * @param {string} sColor
+ */
+const setBackgroundColor = async (sId, sColor) => {
+    await Survey.findOneAndUpdate({ id: sId }, { backgroundColor: sColor })
+        .exec()
+        .then()
+        .catch((err) => {
+            console.log(err);
+        });
+};
 module.exports = {
     getSurveyByAuthor,
     deleteSurveyById,
@@ -178,4 +203,6 @@ module.exports = {
     findSurveyById,
     setTitle,
     setDescription,
+    setInterfaceColor,
+    setBackgroundColor,
 };

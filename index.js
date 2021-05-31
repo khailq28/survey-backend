@@ -10,6 +10,8 @@ const {
     findSurveyById,
     setTitle,
     setDescription,
+    setInterfaceColor,
+    setBackgroundColor,
 } = require("./action");
 
 const PORT = process.env.PORT || 5000;
@@ -49,6 +51,14 @@ io.on("connection", (socket) => {
 
         socket.on("CLIENT_CHANGE_DESCRIPTION_FORM", (sDescription) => {
             setDescription(oData.id, sDescription);
+        });
+
+        socket.on("CLIENT_CHANGE_INTERFACE_COLOR", (sColor) => {
+            setInterfaceColor(oData.id, sColor);
+        });
+
+        socket.on("CLIENT_CHANGE_BACKGROUND_COLOR", (sColor) => {
+            setBackgroundColor(oData.id, sColor);
         });
     });
 
