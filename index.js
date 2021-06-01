@@ -64,30 +64,40 @@ io.on("connection", (socket) => {
         });
 
         socket.on("CLIENT_CHANGE_INTERFACE_COLOR", (sColor) => {
-            setInterfaceColor(oData.id, sColor);
+            setInterfaceColor(oData.id, oData.author, sColor, io);
         });
 
         socket.on("CLIENT_CHANGE_BACKGROUND_COLOR", (sColor) => {
-            setBackgroundColor(oData.id, sColor);
+            setBackgroundColor(oData.id, oData.author, sColor, io);
         });
 
         socket.on("CLIENT_SET_QUESTIONS", (aQuestions) => {
-            setQuestions(oData.id, aQuestions);
+            setQuestions(oData.id, oData.author, aQuestions, io);
         });
 
         socket.on("CLIENT_CHANGE_OPEN_QUESTION", (sIdQues) => {
-            setOpenQuestion(oData.id, sIdQues);
+            setOpenQuestion(oData.id, oData.author, sIdQues, io);
         });
 
         socket.on("CLIENT_CHANGE_TITLE_QUESTION", (oDataSetTitleQues) => {
-            setTitleQuestion(oData.id, oDataSetTitleQues, socket, io);
+            setTitleQuestion(
+                oData.id,
+                oData.author,
+                oDataSetTitleQues.id,
+                oDataSetTitleQues.value,
+                oDataSetTitleQues.index,
+                io,
+            );
         });
 
         socket.on("CLIENT_CHANGE_QUESTION_TYPE", (oDataSetTitleQues) => {
             setQuestionType(
                 oData.id,
+                oData.author,
                 oDataSetTitleQues.id,
                 oDataSetTitleQues.value,
+                oDataSetTitleQues.index,
+                io,
             );
         });
 

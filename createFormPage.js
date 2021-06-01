@@ -97,16 +97,23 @@ const setDescription = async (sId, sAuthor, sDescription, io) => {
 
 /*
  * set interface color
+ * @param {string} sId : id form
+ * @param {string} sAuthor
  * @param {string} sColor
+ * @param io
  */
-const setInterfaceColor = async (sId, sColor) => {
+const setInterfaceColor = async (sId, sAuthor, sColor, io) => {
     await Survey.findOneAndUpdate(
         { _id: sId },
         { interfaceColor: sColor },
         { new: true },
     )
         .exec()
-        .then()
+        .then(() => {
+            io.sockets
+                .in(sAuthor)
+                .emit("SERVER_SEND_NEW_INTERFACE_COLOR", sColor);
+        })
         .catch((err) => {
             console.log(err);
         });
@@ -114,16 +121,23 @@ const setInterfaceColor = async (sId, sColor) => {
 
 /*
  * set background color
+ * @param {string} sId : id form
+ * @param {string} sAuthor
  * @param {string} sColor
+ * @param io
  */
-const setBackgroundColor = async (sId, sColor) => {
+const setBackgroundColor = async (sId, sAuthor, sColor, io) => {
     await Survey.findOneAndUpdate(
         { _id: sId },
         { backgroundColor: sColor },
         { new: true },
     )
         .exec()
-        .then()
+        .then(() => {
+            io.sockets
+                .in(sAuthor)
+                .emit("SERVER_SEND_NEW_BACKGROUND_COLOR", sColor);
+        })
         .catch((err) => {
             console.log(err);
         });
@@ -131,16 +145,23 @@ const setBackgroundColor = async (sId, sColor) => {
 
 /*
  * set questions
- * @param {array} index
+ * @param {string} sId : id form
+ * @param {string} sAuthor
+ * @param {array} aQuestions
+ * @param io
  */
-const setQuestions = async (sId, aQuestions) => {
+const setQuestions = async (sId, sAuthor, aQuestions, io) => {
     await Survey.findOneAndUpdate(
         { _id: sId },
         { questions: aQuestions },
         { new: true },
     )
         .exec()
-        .then()
+        .then(() => {
+            io.sockets
+                .in(sAuthor)
+                .emit("SERVER_SEND_NEW_QUESTIONS", aQuestions);
+        })
         .catch((err) => {
             console.log(err);
         });
@@ -149,9 +170,11 @@ const setQuestions = async (sId, aQuestions) => {
 /*
  * set open question
  * @param {string} sId
+ * @param {string} sAuthor
  * @param {string} sIdQues
+ * @param io
  */
-const setOpenQuestion = async (sId, sIdQues) => {
+const setOpenQuestion = async (sId, sAuthor, sIdQues, io) => {
     await Survey.findOneAndUpdate(
         { _id: sId, "questions.open": true },
         { $set: { "questions.$.open": false } },
@@ -161,7 +184,22 @@ const setOpenQuestion = async (sId, sIdQues) => {
             Survey.findOneAndUpdate(
                 { _id: sId, "questions._id": sIdQues },
                 { $set: { "questions.$.open": true } },
-            ).exec();
+            )
+                .exec()
+                .then(() => {
+                    Survey.findById(sId)
+                        .exec()
+                        .then((data) => {
+                            io.in(sAuthor).emit(
+                                "SERVER_CHANGED_STATUS_OPEN_QUESTION",
+                                data,
+                            );
+                        })
+                        .catch();
+                })
+                .catch((err) => {
+                    console.log(err);
+                });
         })
         .catch((err) => {
             console.log(err);
@@ -171,16 +209,24 @@ const setOpenQuestion = async (sId, sIdQues) => {
 /*
  * set title question
  * @param {string} sId
+ * @param {string} sAuthor
  * @param {string} sIdQues
  * @param {string} sTitle
+ * @param {int} iIndex
+ * @param io
  */
-const setTitleQuestion = async (sId, sIdQues, sTitle) => {
+const setTitleQuestion = async (sId, sAuthor, sIdQues, sTitle, iIndex, io) => {
     await Survey.findOneAndUpdate(
         { _id: sId, "questions._id": sIdQues },
         { $set: { "questions.$.questionText": sTitle } },
     )
         .exec()
-        .then(() => {})
+        .then(() => {
+            io.sockets.in(sAuthor).emit("SERVER_SEND_NEW_TITLE_QUESTION", {
+                title: sTitle,
+                index: iIndex,
+            });
+        })
         .catch((err) => {
             console.log(err);
         });
@@ -189,14 +235,27 @@ const setTitleQuestion = async (sId, sIdQues, sTitle) => {
 /*
  * set question type
  * @param {string} sId
+ * @param {string} sAuthor
  * @param {string} sIdQues
  * @param {string} sType
+ * @param {int} iIndex
+ * @param io
  */
-const setQuestionType = async (sId, sIdQues, sType) => {
+const setQuestionType = async (sId, sAuthor, sIdQues, sType, iIndex, io) => {
     await Survey.findOneAndUpdate(
         { _id: sId, "questions._id": sIdQues },
         { $set: { "questions.$.questionType": sType } },
-    ).exec();
+    )
+        .exec()
+        .then(() => {
+            io.sockets.in(sAuthor).emit("SERVER_SEND_NEW_TYPE_QUESTION", {
+                type: sType,
+                index: iIndex,
+            });
+        })
+        .catch((err) => {
+            console.log(err);
+        });
 };
 
 /*
