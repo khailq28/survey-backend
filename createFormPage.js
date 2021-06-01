@@ -244,7 +244,12 @@ const setTitleQuestion = async (sId, sAuthor, sIdQues, sTitle, iIndex, io) => {
 const setQuestionType = async (sId, sAuthor, sIdQues, sType, iIndex, io) => {
     await Survey.findOneAndUpdate(
         { _id: sId, "questions._id": sIdQues },
-        { $set: { "questions.$.questionType": sType } },
+        {
+            $set: {
+                "questions.$.questionType": sType,
+                "questions.$.options": [{ optionText: "", other: false }],
+            },
+        },
     )
         .exec()
         .then(() => {
@@ -261,14 +266,63 @@ const setQuestionType = async (sId, sAuthor, sIdQues, sType, iIndex, io) => {
 /*
  * set question type
  * @param {string} sId
+ * @param {string} sAuthor
+ * @param {string} sIdQues
  * @param {array} aOptions
+ * @param {int} index       vi tri cua option duoc them trong mang
+ * @param socket
  */
-const setOptions = async (sId, aOptions) => {
+const setOptions = async (sId, sAuthor, sIdQues, aOptions, iIndex, socket) => {
     await Survey.findOneAndUpdate(
-        { _id: sId, "questions._id": aOptions.id },
-        { $set: { "questions.$.options": aOptions.options } },
-    ).exec();
+        { _id: sId, "questions._id": sIdQues },
+        { $set: { "questions.$.options": aOptions } },
+    )
+        .exec()
+        .then(() => {
+            socket.broadcast.to(sAuthor).emit("SERVER_SEND_NEW_OPTIONS", {
+                options: aOptions,
+                id: sIdQues,
+                index: iIndex,
+            });
+        })
+        .catch((err) => {
+            console.log(err);
+        });
 };
+
+/*
+ * change Require question
+ * @param {string} sId
+ * @param {string} sAuthor
+ * @param {string} sIdQues
+ * @param {bool} bRequire
+ * @param {int} iIndex
+ * @param socket
+ */
+const changeRequire = async (
+    sId,
+    sAuthor,
+    sIdQues,
+    bRequire,
+    iIndex,
+    socket,
+) => {
+    await Survey.findOneAndUpdate(
+        { _id: sId, "questions._id": sIdQues },
+        { $set: { "questions.$.required": bRequire } },
+    )
+        .exec()
+        .then(() => {
+            socket.broadcast.to(sAuthor).emit("SERVER_SEND_NEW_REQUIRED", {
+                bRequire,
+                index: iIndex,
+            });
+        })
+        .catch((err) => {
+            console.log(err);
+        });
+};
+
 module.exports = {
     findSurveyById,
     setTitle,
@@ -280,4 +334,5 @@ module.exports = {
     setTitleQuestion,
     setQuestionType,
     setOptions,
+    changeRequire,
 };

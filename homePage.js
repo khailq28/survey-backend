@@ -69,7 +69,7 @@ const createNewForm = async (sAuthor, socket, io) => {
             {
                 questionText: "",
                 questionType: "text",
-                options: [{ optionText: "" }],
+                options: [{ optionText: "", other: false }],
                 open: true,
                 required: false,
                 answers: [],

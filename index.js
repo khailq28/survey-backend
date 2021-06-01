@@ -20,6 +20,7 @@ const {
     setTitleQuestion,
     setQuestionType,
     setOptions,
+    changeRequire,
 } = require("./createFormPage");
 
 const PORT = process.env.PORT || 5000;
@@ -101,12 +102,26 @@ io.on("connection", (socket) => {
             );
         });
 
-        socket.on("CLIENT_ADD_OPTION", (oDataSetTitleQues) => {
-            setOptions(oData.id, oDataSetTitleQues);
+        socket.on("CLIENT_SET_OPTIONS", (aOptions) => {
+            setOptions(
+                oData.id,
+                oData.author,
+                aOptions.id,
+                aOptions.options,
+                aOptions.index,
+                socket,
+            );
         });
 
-        socket.on("AAA", (oDataSetTitleQues) => {
-            console.log(oDataSetTitleQues);
+        socket.on("CLIENT_CHANGE_REQUIRE", (oQues) => {
+            changeRequire(
+                oData.id,
+                oData.author,
+                oQues.id,
+                oQues.value,
+                oQues.index, //to send client
+                socket,
+            );
         });
     });
 
