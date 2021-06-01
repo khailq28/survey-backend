@@ -16,7 +16,7 @@ const SurveysSchema = new mongooes.Schema({
         {
             questionText: String,
             questionType: String,
-            options: [{ optionText: String }],
+            options: [{ optionText: String, other: false }],
             open: {
                 type: Boolean,
                 required: true,

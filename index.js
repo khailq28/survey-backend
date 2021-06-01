@@ -7,6 +7,9 @@ const {
     getSurveyByAuthor,
     deleteSurveyById,
     createNewForm,
+} = require("./homePage");
+
+const {
     findSurveyById,
     setTitle,
     setDescription,
@@ -16,7 +19,8 @@ const {
     setOpenQuestion,
     setTitleQuestion,
     setQuestionType,
-} = require("./action");
+    setOptions,
+} = require("./createFormPage");
 
 const PORT = process.env.PORT || 5000;
 
@@ -47,6 +51,8 @@ io.on("connection", (socket) => {
 
     // create survey
     socket.on("CLIENT_GET_DATA_SURVEY", (oData) => {
+        socket.join(oData.author);
+        socket.room = oData.author;
         findSurveyById(oData.id, oData.author, socket, io);
 
         socket.on("CLIENT_CHANGE_TITLE_FORM", (sTitle) => {
@@ -54,7 +60,7 @@ io.on("connection", (socket) => {
         });
 
         socket.on("CLIENT_CHANGE_DESCRIPTION_FORM", (sDescription) => {
-            setDescription(oData.id, sDescription);
+            setDescription(oData.id, oData.author, sDescription, io);
         });
 
         socket.on("CLIENT_CHANGE_INTERFACE_COLOR", (sColor) => {
@@ -74,11 +80,7 @@ io.on("connection", (socket) => {
         });
 
         socket.on("CLIENT_CHANGE_TITLE_QUESTION", (oDataSetTitleQues) => {
-            setTitleQuestion(
-                oData.id,
-                oDataSetTitleQues.id,
-                oDataSetTitleQues.value,
-            );
+            setTitleQuestion(oData.id, oDataSetTitleQues, socket, io);
         });
 
         socket.on("CLIENT_CHANGE_QUESTION_TYPE", (oDataSetTitleQues) => {
@@ -87,6 +89,14 @@ io.on("connection", (socket) => {
                 oDataSetTitleQues.id,
                 oDataSetTitleQues.value,
             );
+        });
+
+        socket.on("CLIENT_ADD_OPTION", (oDataSetTitleQues) => {
+            setOptions(oData.id, oDataSetTitleQues);
+        });
+
+        socket.on("AAA", (oDataSetTitleQues) => {
+            console.log(oDataSetTitleQues);
         });
     });
 

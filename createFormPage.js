@@ -1,16 +1,5 @@
 const Survey = require("./models/surveyModel");
-
-const formatDate = () => {
-    var date = new Date();
-    var hour = `0${date.getHours()}`.slice(-2);
-    var minute = `0${date.getMinutes()}`.slice(-2);
-    var day = `0${date.getDate()}`.slice(-2);
-    var mounth = `0${date.getMonth() + 1}`.slice(-2);
-    var year = date.getFullYear();
-
-    return `${hour}:${minute} ${day}/${mounth}/${year}`;
-};
-
+const { getSurveyByAuthor, formatDate } = require("./homePage");
 /*
  * update date
  * @param {string} author
@@ -27,86 +16,6 @@ const setUpdateDate = async (sId, sAuthor, socket, io) => {
         .exec()
         .then(() => {
             getSurveyByAuthor(sAuthor, socket, io, false);
-        })
-        .catch((err) => {
-            console.log(err);
-        });
-};
-
-/*
- * get id, title, updateDate by author
- * @param {string} author
- * @param socket
- * @param io
- * @param {boolean} bFirstAccess
- * emit message
- */
-const getSurveyByAuthor = async (sAuthor, socket, io, bFirstAccess) => {
-    await Survey.find({ author: sAuthor }, { title: 1, updateDate: 1 })
-        .exec()
-        .then((data) => {
-            if (bFirstAccess) {
-                socket.emit("SERVER_SEND_SURVEYS", data);
-            } else {
-                io.sockets.in(sAuthor).emit("SERVER_SEND_SURVEYS_ALL", data);
-            }
-        })
-        .catch((err) => {
-            console.log(err);
-        });
-};
-
-/*
- * delete survey by id
- * @param {string} sId
- * @param {string} sAuthor : current user
- * @param socket
- * @param io
- * emit message
- */
-const deleteSurveyById = async (sId, sAuthor, socket, io) => {
-    await Survey.findByIdAndRemove(sId)
-        .exec()
-        .then(() => {
-            getSurveyByAuthor(sAuthor, socket, io, false);
-        })
-        .catch((err) => {
-            console.log(err);
-        });
-};
-
-/*
- * create new form
- * @param {string} sAuthor : current user
- * @param socket
- * @param io
- * emit message
- */
-const createNewForm = async (sAuthor, socket, io) => {
-    const oSurvey = new Survey({
-        author: sAuthor,
-        title: "Mẫu Không tiêu đề",
-        description: "",
-        questions: [
-            {
-                questionText: "",
-                questionType: "text",
-                options: [{ optionText: "" }],
-                open: true,
-                required: false,
-                answers: [],
-            },
-        ],
-        interfaceColor: "#673AB7",
-        backgroundColor: "#F0EBF8",
-        updateDate: formatDate(),
-    });
-
-    oSurvey
-        .save()
-        .then((data) => {
-            getSurveyByAuthor(sAuthor, socket, io, false);
-            socket.emit("SERVER_SEND_MESSAGE_CREATE_SURVEY_SUCCESS", data._id);
         })
         .catch((err) => {
             console.log(err);
@@ -155,6 +64,7 @@ const setTitle = async (sId, sAuthor, sTitle, socket, io) => {
         .exec()
         .then(() => {
             getSurveyByAuthor(sAuthor, socket, io, false);
+            io.sockets.in(sAuthor).emit("SERVER_SEND_NEW_TITLE", sTitle);
         })
         .catch((err) => {
             console.log(err);
@@ -164,16 +74,22 @@ const setTitle = async (sId, sAuthor, sTitle, socket, io) => {
 /*
  * set description
  * @param {string} sId : id form
+ * @param {string} sAuthor
  * @param {string} sDescription
+ * @param io
  */
-const setDescription = async (sId, sDescription) => {
+const setDescription = async (sId, sAuthor, sDescription, io) => {
     await Survey.findOneAndUpdate(
         { _id: sId },
         { description: sDescription },
         { new: true },
     )
         .exec()
-        .then()
+        .then(() => {
+            io.sockets
+                .in(sAuthor)
+                .emit("SERVER_SEND_NEW_DESCRIPTION", sDescription);
+        })
         .catch((err) => {
             console.log(err);
         });
@@ -262,7 +178,12 @@ const setTitleQuestion = async (sId, sIdQues, sTitle) => {
     await Survey.findOneAndUpdate(
         { _id: sId, "questions._id": sIdQues },
         { $set: { "questions.$.questionText": sTitle } },
-    ).exec();
+    )
+        .exec()
+        .then(() => {})
+        .catch((err) => {
+            console.log(err);
+        });
 };
 
 /*
@@ -277,10 +198,19 @@ const setQuestionType = async (sId, sIdQues, sType) => {
         { $set: { "questions.$.questionType": sType } },
     ).exec();
 };
+
+/*
+ * set question type
+ * @param {string} sId
+ * @param {array} aOptions
+ */
+const setOptions = async (sId, aOptions) => {
+    await Survey.findOneAndUpdate(
+        { _id: sId, "questions._id": aOptions.id },
+        { $set: { "questions.$.options": aOptions.options } },
+    ).exec();
+};
 module.exports = {
-    getSurveyByAuthor,
-    deleteSurveyById,
-    createNewForm,
     findSurveyById,
     setTitle,
     setDescription,
@@ -290,4 +220,5 @@ module.exports = {
     setOpenQuestion,
     setTitleQuestion,
     setQuestionType,
+    setOptions,
 };
