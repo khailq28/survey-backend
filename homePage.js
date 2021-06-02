@@ -69,12 +69,16 @@ const createNewForm = async (sAuthor, socket, io) => {
             {
                 questionText: "",
                 questionType: "text",
-                options: [{ optionText: "", other: false }],
+                image: "",
+                options: [
+                    { optionText: "Tùy chọn 1", image: "", other: false },
+                ],
                 open: true,
                 required: false,
                 answers: [],
             },
         ],
+        image: "",
         interfaceColor: "#673AB7",
         backgroundColor: "#F0EBF8",
         updateDate: formatDate(),

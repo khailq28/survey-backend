@@ -16,7 +16,8 @@ const SurveysSchema = new mongooes.Schema({
         {
             questionText: String,
             questionType: String,
-            options: [{ optionText: String, other: false }],
+            image: String,
+            options: [{ optionText: String, image: String, other: false }],
             open: {
                 type: Boolean,
                 required: true,
@@ -26,16 +27,18 @@ const SurveysSchema = new mongooes.Schema({
                 required: true,
             },
             answers: [
-                {
-                    user: {
-                        type: String,
-                        required: true,
-                    },
-                    answer: String,
-                },
+                // {
+                //     user: {
+                //         type: String,
+                //         required: true,
+                //     },
+                //     typeQuestion: String,
+                //     answer: String,
+                // },
             ],
         },
     ],
+    image: String,
     interfaceColor: {
         type: String,
         required: true,

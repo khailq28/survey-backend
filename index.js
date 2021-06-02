@@ -2,6 +2,7 @@ const express = require("express");
 const socketio = require("socket.io");
 const http = require("http");
 const mongoose = require("mongoose");
+const cors = require("cors");
 
 const {
     getSurveyByAuthor,
@@ -130,26 +131,7 @@ io.on("connection", (socket) => {
     });
 });
 
-// const Survey = require("./models/surveyModel");
-// var a = `questions.${2}.open`;
-// Survey.findOneAndUpdate(
-//     {
-//         id: "00ef6ae-73e1-682e-ab7-f11e1ae8713",
-//     },
-//     { "questions.2.open": true },
-//     // { "questions[0].open": 1 },
-//     // { $set: { "questions.$.open": false } },
-//     // // { id: sId },
-//     // { $set: { "questions.$.questionText": "s" } },
-// )
-//     .exec()
-//     .then((data) => {
-//         console.log(data);
-//     })
-//     .catch((err) => {
-//         console.log(err);
-//     });
-
+app.use(cors());
 app.use(router);
 
 mongoose
