@@ -1,5 +1,11 @@
 const Survey = require("./models/surveyModel");
 const { getSurveyByAuthor, formatDate } = require("./homePage");
+
+// xoa file
+const fs = require("fs");
+const { promisify } = require("util");
+const unlinkAsync = promisify(fs.unlink);
+
 /*
  * update date
  * @param {string} author
@@ -323,6 +329,59 @@ const changeRequire = async (
         });
 };
 
+/*
+ * set question image
+ * @param {string} sIdForm
+ * @param {string} sIdQuestion
+ * @param {int} index
+ * @param {string} sImage
+ */
+const setQuestionImage = async (sIdForm, sIdQuestion, index, sImage) => {
+    await Survey.findById(sIdForm)
+        .exec()
+        .then((data) => {
+            if (data.questions[index].image !== "") {
+                unlinkAsync(data.questions[index].image);
+            }
+            Survey.findOneAndUpdate(
+                { _id: sIdForm, "questions._id": sIdQuestion },
+                { $set: { "questions.$.image": sImage } },
+            )
+                .exec()
+                .then()
+                .catch((err) => {
+                    console.log(err);
+                });
+        })
+        .catch((err) => {
+            console.log(err);
+        });
+};
+
+/*
+ * set question image
+ * @param {object} oImage {sIdForm, sIdQuestion, path, index}
+ * @param {string} sAuthor
+ * @param io
+ */
+const deleteQuesImg = async (oImage, sAuthor, io) => {
+    await Survey.findOneAndUpdate(
+        { _id: oImage.sIdForm, "questions._id": oImage.sIdQuestion },
+        { $set: { "questions.$.image": "" } },
+    )
+        .exec()
+        .then(() => {
+            unlinkAsync(oImage.path);
+            io.sockets.in(sAuthor).emit("SERVER_SEND_MSG_QUESTION_IMAGE", {
+                image: "",
+                index: oImage.index,
+            });
+        })
+        .catch((err) => {
+            console.log(err);
+        });
+};
+
 module.exports = {
     findSurveyById,
     setTitle,
@@ -335,4 +394,6 @@ module.exports = {
     setQuestionType,
     setOptions,
     changeRequire,
+    setQuestionImage,
+    deleteQuesImg,
 };

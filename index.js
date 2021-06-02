@@ -22,6 +22,7 @@ const {
     setQuestionType,
     setOptions,
     changeRequire,
+    deleteQuesImg,
 } = require("./createFormPage");
 
 const PORT = process.env.PORT || 5000;
@@ -124,6 +125,16 @@ io.on("connection", (socket) => {
                 socket,
             );
         });
+
+        socket.on("CLIENT_SET_QUESTION_IMAGE", (oImage) => {
+            io.sockets
+                .in(oData.author)
+                .emit("SERVER_SEND_MSG_QUESTION_IMAGE", oImage);
+        });
+
+        socket.on("CLIENT_DELETE_QUESTION_IMAGE", (oImage) => {
+            deleteQuesImg(oImage, oData.author, io);
+        });
     });
 
     socket.on("disconnect", () => {
@@ -131,6 +142,7 @@ io.on("connection", (socket) => {
     });
 });
 
+app.use(express.static("public"));
 app.use(cors());
 app.use(router);
 
