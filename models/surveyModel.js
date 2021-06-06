@@ -27,18 +27,17 @@ const SurveysSchema = new mongooes.Schema({
                 required: true,
             },
             answers: [
-                // {
-                //     user: {
-                //         type: String,
-                //         required: true,
-                //     },
-                //     typeQuestion: String,
-                //     answer: String,
-                // },
+                {
+                    user: {
+                        type: String,
+                        required: true,
+                    },
+                    typeQuestion: String,
+                    answer: String,
+                },
             ],
         },
     ],
-    image: String,
     interfaceColor: {
         type: String,
         required: true,

@@ -1,6 +1,6 @@
 const express = require("express");
 const multer = require("multer");
-const { setQuestionImage } = require("./createFormPage");
+const { setQuestionImage, setOptionImage } = require("./createFormPage");
 
 const path = require("path");
 
@@ -48,12 +48,28 @@ var upload = multer({
 
 const router = express.Router();
 
-// Upload Image
+// Upload question Image
 router.post("/setQuestionImage", upload.single("photo"), (req, res, next) => {
     setQuestionImage(
         req.body.idForm,
         req.body.idQues,
         req.body.index,
+        req.file.path,
+    );
+    return res.json({
+        image: req.file.path,
+        idForm: req.body.idForm,
+        idQues: req.body.idQues,
+    });
+});
+
+// Upload option Image
+router.post("/setOptionImage", upload.single("photo"), (req, res, next) => {
+    setOptionImage(
+        req.body.idForm,
+        req.body.idQues,
+        req.body.indexQues,
+        req.body.indexOption,
         req.file.path,
     );
     return res.json({

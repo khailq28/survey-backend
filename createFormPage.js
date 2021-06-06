@@ -4,7 +4,6 @@ const { getSurveyByAuthor, formatDate } = require("./homePage");
 // xoa file
 const fs = require("fs");
 const { promisify } = require("util");
-const unlinkAsync = promisify(fs.unlink);
 
 /*
  * update date
@@ -56,21 +55,21 @@ const findSurveyById = async (sId, sAuthor, socket, io) => {
  * set title
  * @param {string} sId : id form
  * @param {string} sAuthor
- * @param {string} sTitle
+ * @param {object} oTitle
  * @param socket
  * @param io
  */
 
-const setTitle = async (sId, sAuthor, sTitle, socket, io) => {
+const setTitle = async (sId, sAuthor, oTitle, socket, io) => {
     await Survey.findOneAndUpdate(
         { _id: sId },
-        { title: sTitle },
+        { title: oTitle.value },
         { new: true },
     )
         .exec()
         .then(() => {
             getSurveyByAuthor(sAuthor, socket, io, false);
-            io.sockets.in(sAuthor).emit("SERVER_SEND_NEW_TITLE", sTitle);
+            io.sockets.in(sAuthor).emit("SERVER_SEND_NEW_TITLE", oTitle);
         })
         .catch((err) => {
             console.log(err);
@@ -81,20 +80,20 @@ const setTitle = async (sId, sAuthor, sTitle, socket, io) => {
  * set description
  * @param {string} sId : id form
  * @param {string} sAuthor
- * @param {string} sDescription
+ * @param {object} oDescription
  * @param io
  */
-const setDescription = async (sId, sAuthor, sDescription, io) => {
+const setDescription = async (sId, sAuthor, oDescription, io) => {
     await Survey.findOneAndUpdate(
         { _id: sId },
-        { description: sDescription },
+        { description: oDescription.value },
         { new: true },
     )
         .exec()
         .then(() => {
             io.sockets
                 .in(sAuthor)
-                .emit("SERVER_SEND_NEW_DESCRIPTION", sDescription);
+                .emit("SERVER_SEND_NEW_DESCRIPTION", oDescription);
         })
         .catch((err) => {
             console.log(err);
@@ -105,20 +104,20 @@ const setDescription = async (sId, sAuthor, sDescription, io) => {
  * set interface color
  * @param {string} sId : id form
  * @param {string} sAuthor
- * @param {string} sColor
+ * @param {object} oColor
  * @param io
  */
-const setInterfaceColor = async (sId, sAuthor, sColor, io) => {
+const setInterfaceColor = async (sId, sAuthor, oColor, io) => {
     await Survey.findOneAndUpdate(
         { _id: sId },
-        { interfaceColor: sColor },
+        { interfaceColor: oColor.color },
         { new: true },
     )
         .exec()
         .then(() => {
             io.sockets
                 .in(sAuthor)
-                .emit("SERVER_SEND_NEW_INTERFACE_COLOR", sColor);
+                .emit("SERVER_SEND_NEW_INTERFACE_COLOR", oColor);
         })
         .catch((err) => {
             console.log(err);
@@ -129,20 +128,20 @@ const setInterfaceColor = async (sId, sAuthor, sColor, io) => {
  * set background color
  * @param {string} sId : id form
  * @param {string} sAuthor
- * @param {string} sColor
+ * @param {object} oColor
  * @param io
  */
-const setBackgroundColor = async (sId, sAuthor, sColor, io) => {
+const setBackgroundColor = async (sId, sAuthor, oColor, io) => {
     await Survey.findOneAndUpdate(
         { _id: sId },
-        { backgroundColor: sColor },
+        { backgroundColor: oColor.color },
         { new: true },
     )
         .exec()
         .then(() => {
             io.sockets
                 .in(sAuthor)
-                .emit("SERVER_SEND_NEW_BACKGROUND_COLOR", sColor);
+                .emit("SERVER_SEND_NEW_BACKGROUND_COLOR", oColor);
         })
         .catch((err) => {
             console.log(err);
@@ -153,20 +152,20 @@ const setBackgroundColor = async (sId, sAuthor, sColor, io) => {
  * set questions
  * @param {string} sId : id form
  * @param {string} sAuthor
- * @param {array} aQuestions
+ * @param {object} oQuestions
  * @param io
  */
-const setQuestions = async (sId, sAuthor, aQuestions, io) => {
+const setQuestions = async (sId, sAuthor, oQuestions, io) => {
     await Survey.findOneAndUpdate(
         { _id: sId },
-        { questions: aQuestions },
+        { questions: oQuestions.questions },
         { new: true },
     )
         .exec()
         .then(() => {
             io.sockets
                 .in(sAuthor)
-                .emit("SERVER_SEND_NEW_QUESTIONS", aQuestions);
+                .emit("SERVER_SEND_NEW_QUESTIONS", oQuestions);
         })
         .catch((err) => {
             console.log(err);
@@ -177,10 +176,10 @@ const setQuestions = async (sId, sAuthor, aQuestions, io) => {
  * set open question
  * @param {string} sId
  * @param {string} sAuthor
- * @param {string} sIdQues
+ * @param {object} oIdQues
  * @param io
  */
-const setOpenQuestion = async (sId, sAuthor, sIdQues, io) => {
+const setOpenQuestion = async (sId, sAuthor, oIdQues, io) => {
     await Survey.findOneAndUpdate(
         { _id: sId, "questions.open": true },
         { $set: { "questions.$.open": false } },
@@ -188,7 +187,7 @@ const setOpenQuestion = async (sId, sAuthor, sIdQues, io) => {
         .exec()
         .then(() => {
             Survey.findOneAndUpdate(
-                { _id: sId, "questions._id": sIdQues },
+                { _id: sId, "questions._id": oIdQues.idQuestion },
                 { $set: { "questions.$.open": true } },
             )
                 .exec()
@@ -198,7 +197,7 @@ const setOpenQuestion = async (sId, sAuthor, sIdQues, io) => {
                         .then((data) => {
                             io.in(sAuthor).emit(
                                 "SERVER_CHANGED_STATUS_OPEN_QUESTION",
-                                data,
+                                { survey: data, idForm: oIdQues.idForm },
                             );
                         })
                         .catch();
@@ -218,10 +217,19 @@ const setOpenQuestion = async (sId, sAuthor, sIdQues, io) => {
  * @param {string} sAuthor
  * @param {string} sIdQues
  * @param {string} sTitle
+ * @param {string} idForm
  * @param {int} iIndex
  * @param io
  */
-const setTitleQuestion = async (sId, sAuthor, sIdQues, sTitle, iIndex, io) => {
+const setTitleQuestion = async (
+    sId,
+    sAuthor,
+    sIdQues,
+    sTitle,
+    iIndex,
+    idForm,
+    io,
+) => {
     await Survey.findOneAndUpdate(
         { _id: sId, "questions._id": sIdQues },
         { $set: { "questions.$.questionText": sTitle } },
@@ -231,6 +239,7 @@ const setTitleQuestion = async (sId, sAuthor, sIdQues, sTitle, iIndex, io) => {
             io.sockets.in(sAuthor).emit("SERVER_SEND_NEW_TITLE_QUESTION", {
                 title: sTitle,
                 index: iIndex,
+                idForm,
             });
         })
         .catch((err) => {
@@ -245,23 +254,36 @@ const setTitleQuestion = async (sId, sAuthor, sIdQues, sTitle, iIndex, io) => {
  * @param {string} sIdQues
  * @param {string} sType
  * @param {int} iIndex
+ * @param {String} idForm
  * @param io
  */
-const setQuestionType = async (sId, sAuthor, sIdQues, sType, iIndex, io) => {
+const setQuestionType = async (
+    sId,
+    sAuthor,
+    sIdQues,
+    sType,
+    iIndex,
+    idForm,
+    io,
+) => {
     await Survey.findOneAndUpdate(
         { _id: sId, "questions._id": sIdQues },
         {
             $set: {
                 "questions.$.questionType": sType,
-                "questions.$.options": [{ optionText: "", other: false }],
+                "questions.$.options": [
+                    { optionText: "Tùy chọn 1", image: "", other: false },
+                ],
             },
         },
     )
         .exec()
-        .then(() => {
+        .then((data) => {
             io.sockets.in(sAuthor).emit("SERVER_SEND_NEW_TYPE_QUESTION", {
+                options: data.questions[iIndex].options,
                 type: sType,
                 index: iIndex,
+                idForm,
             });
         })
         .catch((err) => {
@@ -276,19 +298,29 @@ const setQuestionType = async (sId, sAuthor, sIdQues, sType, iIndex, io) => {
  * @param {string} sIdQues
  * @param {array} aOptions
  * @param {int} index       vi tri cua option duoc them trong mang
+ * @param {string} idForm
  * @param socket
  */
-const setOptions = async (sId, sAuthor, sIdQues, aOptions, iIndex, socket) => {
+const setOptions = async (
+    sId,
+    sAuthor,
+    sIdQues,
+    aOptions,
+    iIndex,
+    idForm,
+    socket,
+) => {
     await Survey.findOneAndUpdate(
         { _id: sId, "questions._id": sIdQues },
         { $set: { "questions.$.options": aOptions } },
     )
         .exec()
-        .then(() => {
+        .then((data) => {
             socket.broadcast.to(sAuthor).emit("SERVER_SEND_NEW_OPTIONS", {
                 options: aOptions,
                 id: sIdQues,
                 index: iIndex,
+                idForm,
             });
         })
         .catch((err) => {
@@ -303,6 +335,7 @@ const setOptions = async (sId, sAuthor, sIdQues, aOptions, iIndex, socket) => {
  * @param {string} sIdQues
  * @param {bool} bRequire
  * @param {int} iIndex
+ * @param {string} idForm
  * @param socket
  */
 const changeRequire = async (
@@ -311,6 +344,7 @@ const changeRequire = async (
     sIdQues,
     bRequire,
     iIndex,
+    idForm,
     socket,
 ) => {
     await Survey.findOneAndUpdate(
@@ -322,6 +356,7 @@ const changeRequire = async (
             socket.broadcast.to(sAuthor).emit("SERVER_SEND_NEW_REQUIRED", {
                 bRequire,
                 index: iIndex,
+                idForm,
             });
         })
         .catch((err) => {
@@ -341,7 +376,9 @@ const setQuestionImage = async (sIdForm, sIdQuestion, index, sImage) => {
         .exec()
         .then((data) => {
             if (data.questions[index].image !== "") {
-                unlinkAsync(data.questions[index].image);
+                // fs.unlink(data.questions[index].image, function (err) {
+                //     console.log("File question image deleted!");
+                // });
             }
             Survey.findOneAndUpdate(
                 { _id: sIdForm, "questions._id": sIdQuestion },
@@ -359,23 +396,107 @@ const setQuestionImage = async (sIdForm, sIdQuestion, index, sImage) => {
 };
 
 /*
+ * set option image
+ * @param {string} sIdForm
+ * @param {string} sIdQuestion
+ * @param {int} indexQues
+ * @param {int} indexOption
+ * @param {string} sImage
+ */
+const setOptionImage = async (
+    sIdForm,
+    sIdQuestion,
+    indexQues,
+    indexOption,
+    sImage,
+) => {
+    await Survey.findById(sIdForm)
+        .exec()
+        .then((data) => {
+            var aOptions = data.questions[indexQues].options;
+            if (aOptions[indexOption].image !== "") {
+                // fs.unlink(aOptions[indexOption].image, function (err) {
+                //     console.log("File option image deleted!");
+                // });
+            }
+            aOptions[indexOption].image = sImage;
+
+            Survey.findOneAndUpdate(
+                { _id: sIdForm, "questions._id": sIdQuestion },
+                { $set: { "questions.$.options": aOptions } },
+            )
+                .exec()
+                .then(() => {
+                    console.log("xong");
+                })
+                .catch((err) => {
+                    console.log(err);
+                });
+        })
+        .catch((err) => {
+            console.log(err);
+        });
+};
+
+/*
  * set question image
- * @param {object} oImage {sIdForm, sIdQuestion, path, index}
+ * @param {object} oImage {idForm, sIdQuestion, path, index}
  * @param {string} sAuthor
  * @param io
  */
 const deleteQuesImg = async (oImage, sAuthor, io) => {
     await Survey.findOneAndUpdate(
-        { _id: oImage.sIdForm, "questions._id": oImage.sIdQuestion },
+        { _id: oImage.idForm, "questions._id": oImage.sIdQuestion },
         { $set: { "questions.$.image": "" } },
     )
         .exec()
         .then(() => {
-            unlinkAsync(oImage.path);
+            // fs.unlink(oImage.path, function (err) {
+            //     console.log("File deleted!");
+            // });
             io.sockets.in(sAuthor).emit("SERVER_SEND_MSG_QUESTION_IMAGE", {
                 image: "",
                 index: oImage.index,
+                idForm: oImage.idForm,
             });
+        })
+        .catch((err) => {
+            console.log("loi");
+        });
+};
+
+/*
+ * set option image
+ * @param {object} oImage {sIdForm, sIdQuestion, path, index}
+ * @param {string} sAuthor
+ * @param io
+ */
+const deleteOptionImg = async (oImage, sAuthor, io) => {
+    await Survey.findById(oImage.idForm)
+        .exec()
+        .then((oData) => {
+            aOptions = oData.questions[oImage.indexQues].options;
+            aOptions[oImage.indexOption].image = "";
+
+            Survey.findOneAndUpdate(
+                { _id: oImage.idForm, "questions._id": oImage.sIdQuestion },
+                { $set: { "questions.$.options": aOptions } },
+            )
+                .exec()
+                .then(() => {
+                    // fs.unlink(oImage.path, function (err) {
+                    //     console.log("File option image deleted!");
+                    // });
+                    io.sockets.in(sAuthor).emit("SERVER_SEND_NEW_OPTIONS", {
+                        options: aOptions,
+                        id: oImage.sIdQuestion,
+                        index: oImage.indexQues,
+                        idForm: oImage.idForm,
+                    });
+                })
+                .catch((err) => {
+                    console.log(err);
+                });
         })
         .catch((err) => {
             console.log(err);
@@ -396,4 +517,6 @@ module.exports = {
     changeRequire,
     setQuestionImage,
     deleteQuesImg,
+    setOptionImage,
+    deleteOptionImg,
 };

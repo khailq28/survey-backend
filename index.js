@@ -3,6 +3,7 @@ const socketio = require("socket.io");
 const http = require("http");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const Survey = require("./models/surveyModel");
 
 const {
     getSurveyByAuthor,
@@ -23,6 +24,7 @@ const {
     setOptions,
     changeRequire,
     deleteQuesImg,
+    deleteOptionImg,
 } = require("./createFormPage");
 
 const PORT = process.env.PORT || 5000;
@@ -58,28 +60,28 @@ io.on("connection", (socket) => {
         socket.room = oData.author;
         findSurveyById(oData.id, oData.author, socket, io);
 
-        socket.on("CLIENT_CHANGE_TITLE_FORM", (sTitle) => {
-            setTitle(oData.id, oData.author, sTitle, socket, io);
+        socket.on("CLIENT_CHANGE_TITLE_FORM", (oTitle) => {
+            setTitle(oData.id, oData.author, oTitle, socket, io);
         });
 
-        socket.on("CLIENT_CHANGE_DESCRIPTION_FORM", (sDescription) => {
-            setDescription(oData.id, oData.author, sDescription, io);
+        socket.on("CLIENT_CHANGE_DESCRIPTION_FORM", (oDescription) => {
+            setDescription(oData.id, oData.author, oDescription, io);
         });
 
-        socket.on("CLIENT_CHANGE_INTERFACE_COLOR", (sColor) => {
-            setInterfaceColor(oData.id, oData.author, sColor, io);
+        socket.on("CLIENT_CHANGE_INTERFACE_COLOR", (oColor) => {
+            setInterfaceColor(oData.id, oData.author, oColor, io);
         });
 
-        socket.on("CLIENT_CHANGE_BACKGROUND_COLOR", (sColor) => {
-            setBackgroundColor(oData.id, oData.author, sColor, io);
+        socket.on("CLIENT_CHANGE_BACKGROUND_COLOR", (oColor) => {
+            setBackgroundColor(oData.id, oData.author, oColor, io);
         });
 
-        socket.on("CLIENT_SET_QUESTIONS", (aQuestions) => {
-            setQuestions(oData.id, oData.author, aQuestions, io);
+        socket.on("CLIENT_SET_QUESTIONS", (oQuestions) => {
+            setQuestions(oData.id, oData.author, oQuestions, io);
         });
 
-        socket.on("CLIENT_CHANGE_OPEN_QUESTION", (sIdQues) => {
-            setOpenQuestion(oData.id, oData.author, sIdQues, io);
+        socket.on("CLIENT_CHANGE_OPEN_QUESTION", (oIdQues) => {
+            setOpenQuestion(oData.id, oData.author, oIdQues, io);
         });
 
         socket.on("CLIENT_CHANGE_TITLE_QUESTION", (oDataSetTitleQues) => {
@@ -89,6 +91,7 @@ io.on("connection", (socket) => {
                 oDataSetTitleQues.id,
                 oDataSetTitleQues.value,
                 oDataSetTitleQues.index,
+                oDataSetTitleQues.idForm,
                 io,
             );
         });
@@ -100,6 +103,7 @@ io.on("connection", (socket) => {
                 oDataSetTitleQues.id,
                 oDataSetTitleQues.value,
                 oDataSetTitleQues.index,
+                oDataSetTitleQues.idForm,
                 io,
             );
         });
@@ -111,6 +115,7 @@ io.on("connection", (socket) => {
                 aOptions.id,
                 aOptions.options,
                 aOptions.index,
+                aOptions.idForm,
                 socket,
             );
         });
@@ -122,6 +127,7 @@ io.on("connection", (socket) => {
                 oQues.id,
                 oQues.value,
                 oQues.index, //to send client
+                oQues.idForm,
                 socket,
             );
         });
@@ -134,6 +140,30 @@ io.on("connection", (socket) => {
 
         socket.on("CLIENT_DELETE_QUESTION_IMAGE", (oImage) => {
             deleteQuesImg(oImage, oData.author, io);
+        });
+
+        socket.on("CLIENT_SET_OPTION_IMAGE", (oImage) => {
+            Survey.findById(oImage.idForm)
+                .exec()
+                .then((data) => {
+                    var aOptions = data.questions[oImage.index].options;
+                    aOptions[oImage.indexOption].image = oImage.image;
+                    io.sockets
+                        .in(oData.author)
+                        .emit("SERVER_SEND_NEW_OPTIONS", {
+                            id: oImage.id,
+                            index: oImage.index,
+                            idForm: oImage.idForm,
+                            options: aOptions,
+                        });
+                })
+                .catch((err) => {
+                    console.log(err);
+                });
+        });
+
+        socket.on("CLIENT_DELETE_OPTION_IMAGE", (oImage) => {
+            deleteOptionImg(oImage, oData.author, io);
         });
     });
 
