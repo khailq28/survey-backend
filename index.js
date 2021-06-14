@@ -27,6 +27,8 @@ const {
     deleteOptionImg,
 } = require("./createFormPage");
 
+const { findSurveySubmit, submitForm } = require("./submitPage");
+
 const PORT = process.env.PORT || 5000;
 
 const router = require("./router");
@@ -164,6 +166,16 @@ io.on("connection", (socket) => {
 
         socket.on("CLIENT_DELETE_OPTION_IMAGE", (oImage) => {
             deleteOptionImg(oImage, oData.author, io);
+        });
+    });
+
+    socket.on("CLIENT_GET_DATA_SURVEY_SUBMIT", (oData) => {
+        socket.join(oData.author);
+        socket.room = oData.author;
+        findSurveySubmit(oData.id, oData.author, socket);
+
+        socket.on("CLIENT_SUBMIT_FORM", (oSubmit) => {
+            submitForm(oSubmit, socket);
         });
     });
 

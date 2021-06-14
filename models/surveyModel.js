@@ -32,7 +32,9 @@ const SurveysSchema = new mongooes.Schema({
                         type: String,
                         required: true,
                     },
-                    answer: Array,
+                    answer: {
+                        type: [String],
+                    },
                 },
             ],
         },
@@ -47,6 +49,10 @@ const SurveysSchema = new mongooes.Schema({
     },
     updateDate: {
         type: String,
+        required: true,
+    },
+    status: {
+        type: Boolean,
         required: true,
     },
 });

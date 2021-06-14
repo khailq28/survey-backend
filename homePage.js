@@ -81,6 +81,7 @@ const createNewForm = async (sAuthor, socket, io) => {
         interfaceColor: "#673AB7",
         backgroundColor: "#F0EBF8",
         updateDate: formatDate(),
+        status: true,
     });
 
     oSurvey
