@@ -8,13 +8,34 @@ const Survey = require("./models/surveyModel");
  * emit message
  */
 const findSurveySubmit = async (sId, sAuthor, socket) => {
-    await Survey.findById(sId, { "questions.answers": 0 })
+    await Survey.findById(sId, { "questions.answers": 1, status: 1 })
         .exec()
         .then((data) => {
-            if (sAuthor === data.author) {
-                socket.emit("SERVER_SEND_SURVEY_SUBMIT", data);
+            if (data.status) {
+                var checkDo = true;
+                data.questions.forEach((question) => {
+                    question.answers.forEach((answer) => {
+                        if (answer.user === sAuthor) {
+                            checkDo = false;
+                        }
+                    });
+                });
+
+                if (checkDo) {
+                    Survey.findById(sId, { "questions.answers": 0 })
+                        .exec()
+                        .then((data) => {
+                            socket.emit("SERVER_SEND_SURVEY_SUBMIT", data);
+                        })
+                        .catch((err) => {
+                            console.log(err);
+                            socket.emit("SERVER_SEND_MSG_NOT_FOUND");
+                        });
+                } else {
+                    socket.emit("SERVER_SEND_MSG_DONE");
+                }
             } else {
-                socket.emit("SERVER_SEND_MSG_NOT_FOUND");
+                socket.emit("SERVER_SEND_MSG_FORM_CLOSE");
             }
         })
         .catch((err) => {
@@ -24,9 +45,11 @@ const findSurveySubmit = async (sId, sAuthor, socket) => {
 };
 
 /*
- * fpush data answer
+ * push data answer
  * @param {object} oSubmit
  * surveyId: '60c47fa8811822427851c4ae',
+ * author: ""
+ * created: ""
  * content: [
  *  {
  *      idQuestion: '60c47fbb811822427851c4c1',
@@ -56,13 +79,14 @@ const submitForm = async (oSubmit, socket) => {
                     "questions.$.answers": {
                         user: oSubmit.author,
                         answer: answer,
+                        created: oSubmit.created,
                     },
                 },
             },
         )
             .exec()
             .then(() => {
-                console.log("ok");
+                socket.emit("SERVER_SEND_MSG_SUBMIT_SUCCESS");
             })
             .catch((err) => {
                 console.log(err);

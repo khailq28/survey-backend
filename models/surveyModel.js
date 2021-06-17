@@ -35,6 +35,10 @@ const SurveysSchema = new mongooes.Schema({
                     answer: {
                         type: [String],
                     },
+                    created: {
+                        type: String,
+                        required: true,
+                    },
                 },
             ],
         },

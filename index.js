@@ -50,10 +50,10 @@ io.on("connection", (socket) => {
         socket.on("CLIENT_REMOVE_SURVEY", (sSurveyId) => {
             deleteSurveyById(sSurveyId, sAuthor, socket, io);
         });
+    });
 
-        socket.on("CLIENT_CREATE_NEW_FORM", () => {
-            createNewForm(sAuthor, socket, io);
-        });
+    socket.on("CLIENT_CREATE_NEW_FORM", (user) => {
+        createNewForm(user, socket, io);
     });
 
     // create survey
@@ -173,10 +173,10 @@ io.on("connection", (socket) => {
         socket.join(oData.author);
         socket.room = oData.author;
         findSurveySubmit(oData.id, oData.author, socket);
+    });
 
-        socket.on("CLIENT_SUBMIT_FORM", (oSubmit) => {
-            submitForm(oSubmit, socket);
-        });
+    socket.on("CLIENT_SUBMIT_FORM", (oSubmit) => {
+        submitForm(oSubmit, socket);
     });
 
     socket.on("disconnect", () => {
