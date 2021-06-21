@@ -509,6 +509,23 @@ const deleteOptionImg = async (oImage, sAuthor, io) => {
         });
 };
 
+/*
+ * change status form
+ * @param string idForm
+ * @param string value
+ * @param socket
+ */
+const changeStatusForm = async (idForm, value, socket) => {
+    await Survey.findOneAndUpdate({ _id: idForm }, { $set: { status: value } })
+        .exec()
+        .then(() => {
+            socket.broadcast.to(socket.room).emit("SERVER_SEND_NEW_STATUS");
+        })
+        .catch((err) => {
+            console.log("loi");
+        });
+};
+
 module.exports = {
     findSurveyById,
     setTitle,
@@ -525,4 +542,5 @@ module.exports = {
     deleteQuesImg,
     setOptionImage,
     deleteOptionImg,
+    changeStatusForm,
 };

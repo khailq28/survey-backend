@@ -25,6 +25,7 @@ const {
     changeRequire,
     deleteQuesImg,
     deleteOptionImg,
+    changeStatusForm,
 } = require("./createFormPage");
 
 const { findSurveySubmit, submitForm } = require("./submitPage");
@@ -169,6 +170,7 @@ io.on("connection", (socket) => {
         });
     });
 
+    // submit page
     socket.on("CLIENT_GET_DATA_SURVEY_SUBMIT", (oData) => {
         socket.join(oData.author);
         socket.room = oData.author;
@@ -177,6 +179,11 @@ io.on("connection", (socket) => {
 
     socket.on("CLIENT_SUBMIT_FORM", (oSubmit) => {
         submitForm(oSubmit, socket);
+    });
+
+    // result page
+    socket.on("CLIENT_CHANGE_STATUS", (oData) => {
+        changeStatusForm(oData.idForm, oData.value, socket);
     });
 
     socket.on("disconnect", () => {
