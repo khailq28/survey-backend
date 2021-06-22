@@ -35,10 +35,6 @@ const SurveysSchema = new mongooes.Schema({
                     answer: {
                         type: [String],
                     },
-                    created: {
-                        type: String,
-                        required: true,
-                    },
                 },
             ],
         },
@@ -59,6 +55,18 @@ const SurveysSchema = new mongooes.Schema({
         type: Boolean,
         required: true,
     },
+    submiter: [
+        {
+            name: {
+                type: String,
+                required: true,
+            },
+            created: {
+                type: String,
+                required: true,
+            },
+        },
+    ],
 });
 
 module.exports = mongooes.model("Survey", SurveysSchema);

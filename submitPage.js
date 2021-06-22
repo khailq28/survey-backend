@@ -63,6 +63,18 @@ const findSurveySubmit = async (sId, sAuthor, socket) => {
  * emit message
  */
 const submitForm = async (oSubmit, socket) => {
+    Survey.findOneAndUpdate(
+        { _id: oSubmit.surveyId },
+        {
+            $push: {
+                submiter: { name: oSubmit.author, created: oSubmit.created },
+            },
+        },
+    )
+        .exec()
+        .then(() => {})
+        .catch();
+
     oSubmit.content.forEach((element, index) => {
         var answer = [];
         if (element.type === "checkbox") {
@@ -73,20 +85,41 @@ const submitForm = async (oSubmit, socket) => {
             answer.push(element.answers.answer);
         }
         Survey.findOneAndUpdate(
-            { _id: oSubmit.surveyId, "questions._id": element.idQuestion },
+            {
+                _id: oSubmit.surveyId,
+                "questions._id": element.idQuestion,
+            },
             {
                 $push: {
                     "questions.$.answers": {
                         user: oSubmit.author,
                         answer: answer,
-                        created: oSubmit.created,
                     },
                 },
             },
         )
             .exec()
             .then(() => {
-                socket.emit("SERVER_SEND_MSG_SUBMIT_SUCCESS");
+                if (index === oSubmit.content.length - 1) {
+                    Survey.findById(oSubmit.surveyId, {
+                        questions: 1,
+                        author: 1,
+                        submiter: 1,
+                    })
+                        .exec()
+                        .then((data) => {
+                            socket.broadcast
+                                .to(data.author)
+                                .emit("SERVER_SEND_NEW_ANSWER", {
+                                    questions: data.questions,
+                                    idForm: data._id,
+                                    submiter: data.submiter
+                                });
+                        })
+                        .catch();
+
+                    socket.emit("SERVER_SEND_MSG_SUBMIT_SUCCESS");
+                }
             })
             .catch((err) => {
                 console.log(err);

@@ -30,7 +30,7 @@ const {
 
 const { findSurveySubmit, submitForm } = require("./submitPage");
 
-const { getAllResults } = require("./resultPage");
+const {} = require("./resultPage");
 
 const PORT = process.env.PORT || 5000;
 
@@ -186,10 +186,6 @@ io.on("connection", (socket) => {
     // result page
     socket.on("CLIENT_CHANGE_STATUS", (oData) => {
         changeStatusForm(oData.idForm, oData.value, socket);
-    });
-
-    socket.on("CLIENT_GET_RESULTS", (idForm) => {
-        getAllResults(idForm, socket);
     });
 
     socket.on("disconnect", () => {
