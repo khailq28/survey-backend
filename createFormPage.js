@@ -510,6 +510,62 @@ const deleteOptionImg = async (oImage, sAuthor, io) => {
 };
 
 /*
+ * delete result
+ * @param {object} oData
+ * {
+  idSub: '60d3192552bd848094b0288a',
+  idForm: '60d1b49644b87826f4d2e3c5',
+  answer: [
+    {
+      idQues: '60d1b49644b87826f4d2e3c6',
+      idAns: '60d3192552bd848094b0288b'
+    },
+    {
+      idQues: '60d318d352bd848094b02888',
+      idAns: '60d3192552bd848094b0288c'
+    }
+  ]
+}
+ * @param io
+ */
+const deleteResult = async (oData, io) => {
+    Survey.findByIdAndUpdate(oData.idForm, {
+        $pull: { submiter: { _id: oData.idSub } },
+    }).exec();
+
+    oData.answers.forEach((ans, index) => {
+        Survey.findOneAndUpdate(
+            { _id: oData.idForm, "questions._id": ans.idQues },
+            { $pull: { "questions.$.answers": { _id: ans.idAns } } },
+        )
+            .exec()
+            .then(() => {
+                if (index === oData.answers.length - 1) {
+                    Survey.findById(oData.idForm, {
+                        questions: 1,
+                        author: 1,
+                        submiter: 1,
+                    })
+                        .exec()
+                        .then((data) => {
+                            io.sockets
+                                .in(data.author)
+                                .emit("SERVER_SEND_NEW_ANSWER", {
+                                    questions: data.questions,
+                                    idForm: data._id,
+                                    submiter: data.submiter,
+                                });
+                        })
+                        .catch();
+                }
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+    });
+};
+
+/*
  * change status form
  * @param string idForm
  * @param string value
@@ -543,4 +599,5 @@ module.exports = {
     setOptionImage,
     deleteOptionImg,
     changeStatusForm,
+    deleteResult,
 };

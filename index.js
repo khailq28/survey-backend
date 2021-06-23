@@ -26,11 +26,10 @@ const {
     deleteQuesImg,
     deleteOptionImg,
     changeStatusForm,
+    deleteResult,
 } = require("./createFormPage");
 
 const { findSurveySubmit, submitForm } = require("./submitPage");
-
-const {} = require("./resultPage");
 
 const PORT = process.env.PORT || 5000;
 
@@ -186,6 +185,10 @@ io.on("connection", (socket) => {
     // result page
     socket.on("CLIENT_CHANGE_STATUS", (oData) => {
         changeStatusForm(oData.idForm, oData.value, socket);
+    });
+
+    socket.on("CLIENT_DELETE_RESULT", (oData) => {
+        deleteResult(oData, io);
     });
 
     socket.on("disconnect", () => {
