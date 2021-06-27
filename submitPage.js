@@ -113,7 +113,7 @@ const submitForm = async (oSubmit, socket) => {
                                 .emit("SERVER_SEND_NEW_ANSWER", {
                                     questions: data.questions,
                                     idForm: data._id,
-                                    submiter: data.submiter
+                                    submiter: data.submiter,
                                 });
                         })
                         .catch();
