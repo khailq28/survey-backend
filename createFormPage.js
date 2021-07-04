@@ -582,6 +582,93 @@ const changeStatusForm = async (idForm, value, socket) => {
         });
 };
 
+/*
+ * change status time start form
+ * @param string idForm
+ * @param string status
+ * @param socket
+ */
+const changeStatusTimeStart = async (idForm, status, socket) => {
+    await Survey.findOneAndUpdate(
+        { _id: idForm },
+        { $set: { "timer.start.status": status } },
+    )
+        .exec()
+        .then(() => {
+            socket.broadcast
+                .to(socket.room)
+                .emit("SERVER_SEND_NEW_STATUS_TIME_START", status);
+        })
+        .catch((err) => {
+            console.log("loi");
+        });
+};
+
+/*
+ * change status time end form
+ * @param string idForm
+ * @param string status
+ * @param socket
+ */
+const changeStatusTimeEnd = async (idForm, status, socket) => {
+    await Survey.findOneAndUpdate(
+        { _id: idForm },
+        { $set: { "timer.end.status": status } },
+    )
+        .exec()
+        .then(() => {
+            socket.broadcast
+                .to(socket.room)
+                .emit("SERVER_SEND_NEW_STATUS_TIME_END", status);
+        })
+        .catch((err) => {
+            console.log("loi");
+        });
+};
+
+/*
+ * change value time start form
+ * @param string idForm
+ * @param string value
+ * @param socket
+ */
+const changeValueTimeStart = async (idForm, value, socket) => {
+    await Survey.findOneAndUpdate(
+        { _id: idForm },
+        { $set: { "timer.start.value": value } },
+    )
+        .exec()
+        .then(() => {
+            socket.broadcast
+                .to(socket.room)
+                .emit("SERVER_SEND_NEW_VALUE_TIME_END", value);
+        })
+        .catch((err) => {
+            console.log("loi");
+        });
+};
+/*
+ * change status time end form
+ * @param string idForm
+ * @param string value
+ * @param socket
+ */
+const changeValueTimeEnd = async (idForm, value, socket) => {
+    await Survey.findOneAndUpdate(
+        { _id: idForm },
+        { $set: { "timer.end.value": value } },
+    )
+        .exec()
+        .then(() => {
+            socket.broadcast
+                .to(socket.room)
+                .emit("SERVER_SEND_NEW_VALUE_TIME_END", value);
+        })
+        .catch((err) => {
+            console.log("loi");
+        });
+};
+
 module.exports = {
     findSurveyById,
     setTitle,
@@ -600,4 +687,8 @@ module.exports = {
     deleteOptionImg,
     changeStatusForm,
     deleteResult,
+    changeStatusTimeStart,
+    changeStatusTimeEnd,
+    changeValueTimeStart,
+    changeValueTimeEnd,
 };

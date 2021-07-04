@@ -5,10 +5,10 @@ const formatDate = () => {
     var hour = `0${date.getHours()}`.slice(-2);
     var minute = `0${date.getMinutes()}`.slice(-2);
     var day = `0${date.getDate()}`.slice(-2);
-    var mounth = `0${date.getMonth() + 1}`.slice(-2);
+    var month = `0${date.getMonth() + 1}`.slice(-2);
     var year = date.getFullYear();
 
-    return `${hour}:${minute} ${day}/${mounth}/${year}`;
+    return `${hour}:${minute} ${day}/${month}/${year}`;
 };
 
 /*
@@ -83,6 +83,38 @@ const createNewForm = async (sAuthor, socket, io) => {
         updateDate: formatDate(),
         status: true,
         submiter: [],
+        timer: {
+            start: {
+                status: false,
+                value: "",
+            },
+            end: {
+                status: false,
+                value: "",
+            },
+        },
+        // timer: {
+        //     start: {
+        //         status: false,
+        //         hour: "",
+        //         minute: "",
+        //         second: "",
+        //         millisecond: "",
+        //         day: "",
+        //         month: "",
+        //         year: "",
+        //     },
+        //     end: {
+        //         status: false,
+        //         hour: "",
+        //         minute: "",
+        //         second: "",
+        //         millisecond: "",
+        //         day: "",
+        //         month: "",
+        //         year: "",
+        //     },
+        // },
     });
 
     oSurvey

@@ -67,6 +67,38 @@ const SurveysSchema = new mongooes.Schema({
             },
         },
     ],
+    timer: {
+        start: {
+            status: Boolean,
+            value: String,
+        },
+        end: {
+            status: Boolean,
+            value: String,
+        },
+    },
+    // timer: {
+    //     start: {
+    //         status: Boolean,
+    //         hour: String,
+    //         minute: String,
+    //         second: String,
+    //         millisecond: String,
+    //         day: String,
+    //         month: String,
+    //         year: String,
+    //     },
+    //     end: {
+    //         status: Boolean,
+    //         hour: String,
+    //         minute: String,
+    //         second: String,
+    //         millisecond: String,
+    //         day: String,
+    //         month: String,
+    //         year: String,
+    //     },
+    // },
 });
 
 module.exports = mongooes.model("Survey", SurveysSchema);

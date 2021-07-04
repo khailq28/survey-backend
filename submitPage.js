@@ -1,5 +1,16 @@
 const Survey = require("./models/surveyModel");
 
+const formatDate = () => {
+    var date = new Date();
+    var hour = `0${date.getHours()}`.slice(-2);
+    var minute = `0${date.getMinutes()}`.slice(-2);
+    var day = `0${date.getDate()}`.slice(-2);
+    var month = `0${date.getMonth() + 1}`.slice(-2);
+    var year = date.getFullYear();
+
+    return `${year}-${month}-${day}T${hour}:${minute}`;
+};
+
 /*
  * find survey by id
  * @param {string} sId
@@ -8,10 +19,34 @@ const Survey = require("./models/surveyModel");
  * emit message
  */
 const findSurveySubmit = async (sId, sAuthor, socket) => {
-    await Survey.findById(sId, { "questions.answers": 1, status: 1 })
+    await Survey.findById(sId, { "questions.answers": 1, status: 1, timer: 1 })
         .exec()
         .then((data) => {
-            if (data.status) {
+            var checkTime = true;
+            var date = new Date(formatDate());
+
+            if (data.timer.start.status && data.timer.end.status) {
+                var start = new Date(data.timer.start.value);
+                var end = new Date(data.timer.end.value);
+
+                if (date - start < 0 && end - date < 0) {
+                    checkTime = false;
+                }
+            } else if (data.timer.end.status) {
+                var end = new Date(data.timer.end.value);
+
+                if (end - date < 0) {
+                    checkTime = false;
+                }
+            } else if (data.timer.start.status) {
+                var start = new Date(data.timer.start.value);
+
+                if (date - start < 0) {
+                    checkTime = false;
+                }
+            }
+
+            if (data.status && checkTime) {
                 var checkDo = true;
                 data.questions.forEach((question) => {
                     question.answers.forEach((answer) => {

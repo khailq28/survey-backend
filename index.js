@@ -27,6 +27,10 @@ const {
     deleteOptionImg,
     changeStatusForm,
     deleteResult,
+    changeStatusTimeStart,
+    changeStatusTimeEnd,
+    changeValueTimeStart,
+    changeValueTimeEnd,
 } = require("./createFormPage");
 
 const { findSurveySubmit, submitForm } = require("./submitPage");
@@ -189,6 +193,22 @@ io.on("connection", (socket) => {
 
     socket.on("CLIENT_DELETE_RESULT", (oData) => {
         deleteResult(oData, io);
+    });
+
+    socket.on("CLIENT_CHANGE_STATUS_TIME_START", (oData) => {
+        changeStatusTimeStart(oData.idForm, oData.status, socket);
+    });
+
+    socket.on("CLIENT_CHANGE_STATUS_TIME_END", (oData) => {
+        changeStatusTimeEnd(oData.idForm, oData.status, socket);
+    });
+
+    socket.on("CLIENT_CHANGE_VALUE_TIME_START", (oData) => {
+        changeValueTimeStart(oData.idForm, oData.value, socket);
+    });
+
+    socket.on("CLIENT_CHANGE_VALUE_TIME_END", (oData) => {
+        changeValueTimeEnd(oData.idForm, oData.value, socket);
     });
 
     socket.on("disconnect", () => {
