@@ -29,7 +29,7 @@ const findSurveySubmit = async (sId, sAuthor, socket) => {
                 var start = new Date(data.timer.start.value);
                 var end = new Date(data.timer.end.value);
 
-                if (date - start < 0 && end - date < 0) {
+                if (date - start < 0 || end - date < 0 || end - start < 0) {
                     checkTime = false;
                 }
             } else if (data.timer.end.status) {
