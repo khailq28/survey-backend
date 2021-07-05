@@ -23,7 +23,7 @@ const findSurveySubmit = async (sId, sAuthor, socket) => {
         .exec()
         .then((data) => {
             var checkTime = true;
-            var date = new Date(formatDate());
+            var date = new Date(formatDate()).getTimezoneOffset();
             console.log(date);
 
             if (data.timer.start.status && data.timer.end.status) {

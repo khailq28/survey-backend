@@ -1,7 +1,7 @@
 const Survey = require("./models/surveyModel");
 
 const formatDate = () => {
-    var date = new Date();
+    var date = new Date().getTimezoneOffset();
     var hour = `0${date.getHours()}`.slice(-2);
     var minute = `0${date.getMinutes()}`.slice(-2);
     var day = `0${date.getDate()}`.slice(-2);
