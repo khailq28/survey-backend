@@ -24,7 +24,7 @@ const findSurveySubmit = async (sId, sAuthor, socket) => {
         .then((data) => {
             var checkTime = true;
             var date = new Date(formatDate()).toLocaleString("en-US", {
-                timeZone: "Asia/Calcutta",
+                timeZone: "Asia/Jakarta",
             });
             console.log(date);
 
