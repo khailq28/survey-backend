@@ -24,6 +24,7 @@ const findSurveySubmit = async (sId, sAuthor, socket) => {
         .then((data) => {
             var checkTime = true;
             var date = new Date(formatDate());
+            console.log(date);
 
             if (data.timer.start.status && data.timer.end.status) {
                 var start = new Date(data.timer.start.value);
