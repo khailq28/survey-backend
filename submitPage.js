@@ -28,20 +28,40 @@ const findSurveySubmit = async (sId, sAuthor, socket) => {
             });
 
             if (data.timer.start.status && data.timer.end.status) {
-                var start = new Date(data.timer.start.value);
-                var end = new Date(data.timer.end.value);
+                var start = new Date(data.timer.start.value).toLocaleString(
+                    "en-US",
+                    {
+                        timeZone: "Asia/Jakarta",
+                    },
+                );
+                var end = new Date(data.timer.end.value).toLocaleString(
+                    "en-US",
+                    {
+                        timeZone: "Asia/Jakarta",
+                    },
+                );
 
                 if (date - start < 0 || end - date < 0 || end - start <= 0) {
                     checkTime = false;
                 }
             } else if (data.timer.end.status) {
-                var end = new Date(data.timer.end.value);
+                var end = new Date(data.timer.end.value).toLocaleString(
+                    "en-US",
+                    {
+                        timeZone: "Asia/Jakarta",
+                    },
+                );
 
                 if (end - date < 0) {
                     checkTime = false;
                 }
             } else if (data.timer.start.status) {
-                var start = new Date(data.timer.start.value);
+                var start = new Date(data.timer.start.value).toLocaleString(
+                    "en-US",
+                    {
+                        timeZone: "Asia/Jakarta",
+                    },
+                );
 
                 if (date - start < 0) {
                     checkTime = false;
