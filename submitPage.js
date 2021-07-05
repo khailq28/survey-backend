@@ -23,7 +23,7 @@ const findSurveySubmit = async (sId, sAuthor, socket) => {
         .exec()
         .then((data) => {
             var checkTime = true;
-            var date = new Date(formatDate()).toLocaleString("en-US");
+            var date = new Date(formatDate()).toLocaleString("Asia/Jakarta");
             console.log(date);
 
             if (data.timer.start.status && data.timer.end.status) {
