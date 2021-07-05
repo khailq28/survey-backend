@@ -26,7 +26,6 @@ const findSurveySubmit = async (sId, sAuthor, socket) => {
             var date = new Date(formatDate()).toLocaleString("en-US", {
                 timeZone: "Asia/Jakarta",
             });
-            console.log(date);
 
             if (data.timer.start.status && data.timer.end.status) {
                 var start = new Date(data.timer.start.value);
