@@ -1,7 +1,17 @@
 const Survey = require("./models/surveyModel");
 
+function convertTZ(date, tzString) {
+    return new Date(
+        (typeof date === "string" ? new Date(date) : date).toLocaleString(
+            "en-US",
+            { timeZone: tzString },
+        ),
+    );
+}
+
 const formatDate = () => {
-    var date = new Date();
+    var newDate = new Date();
+    var date = convertTZ(newDate, "Asia/Jakarta");
     var hour = `0${date.getHours()}`.slice(-2);
     var minute = `0${date.getMinutes()}`.slice(-2);
     var day = `0${date.getDate()}`.slice(-2);
@@ -23,45 +33,23 @@ const findSurveySubmit = async (sId, sAuthor, socket) => {
         .exec()
         .then((data) => {
             var checkTime = true;
-            var date = new Date(formatDate()).toLocaleString("en-US", {
-                timeZone: "Asia/Jakarta",
-            });
+            var date = new Date(formatDate());
 
             if (data.timer.start.status && data.timer.end.status) {
-                var start = new Date(data.timer.start.value).toLocaleString(
-                    "en-US",
-                    {
-                        timeZone: "Asia/Jakarta",
-                    },
-                );
-                var end = new Date(data.timer.end.value).toLocaleString(
-                    "en-US",
-                    {
-                        timeZone: "Asia/Jakarta",
-                    },
-                );
+                var start = new Date(data.timer.start.value);
+                var end = new Date(data.timer.end.value);
 
                 if (date - start < 0 || end - date < 0 || end - start <= 0) {
                     checkTime = false;
                 }
             } else if (data.timer.end.status) {
-                var end = new Date(data.timer.end.value).toLocaleString(
-                    "en-US",
-                    {
-                        timeZone: "Asia/Jakarta",
-                    },
-                );
+                var end = new Date(data.timer.end.value);
 
                 if (end - date < 0) {
                     checkTime = false;
                 }
             } else if (data.timer.start.status) {
-                var start = new Date(data.timer.start.value).toLocaleString(
-                    "en-US",
-                    {
-                        timeZone: "Asia/Jakarta",
-                    },
-                );
+                var start = new Date(data.timer.start.value);
 
                 if (date - start < 0) {
                     checkTime = false;

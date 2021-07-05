@@ -1,7 +1,17 @@
 const Survey = require("./models/surveyModel");
 
+function convertTZ(date, tzString) {
+    return new Date(
+        (typeof date === "string" ? new Date(date) : date).toLocaleString(
+            "en-US",
+            { timeZone: tzString },
+        ),
+    );
+}
+
 const formatDate = () => {
-    var date = new Date();
+    var newDate = new Date();
+    var date = convertTZ(newDate, "Asia/Jakarta");
     var hour = `0${date.getHours()}`.slice(-2);
     var minute = `0${date.getMinutes()}`.slice(-2);
     var day = `0${date.getDate()}`.slice(-2);
